@@ -1,6 +1,8 @@
 # local files
 .DS_Store
 activate.bat
+data/
+database/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
