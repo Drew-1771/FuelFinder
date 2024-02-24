@@ -6,7 +6,10 @@ import csv
 
 class Database:
     def __init__(self) -> None:
+        Path(Path.cwd() / "database").mkdir(exist_ok=True)
+
         self._path = Path(Path.cwd() / "database" / "database.db")
+        debug(f"Database self._path set to {self._path}")
 
         # if db file is not found, perform first time setup
         if not self._path.exists():
@@ -61,11 +64,6 @@ class Database:
                 )
                 """
             )
-
-            try:
-                Path("database/").mkdir()
-            except FileExistsError:
-                debug("database folder already exists")
             self._connection.commit()
         # else, connect
         else:
