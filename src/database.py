@@ -2,6 +2,7 @@ from _debug import debug
 import sqlite3
 from pathlib import Path
 import csv
+from collections import defaultdict
 
 
 class Database:
@@ -122,6 +123,15 @@ class Database:
                 """
         ).fetchall()
 
+    def view_allergens(self) -> list:
+        self._connection.execute("PRAGMA foreign_keys = ON")
+        return self._cursor.execute(
+            """
+                SELECT ALLERGEN_NAME, INGREDIENT
+                FROM ALLERGEN as a
+                """
+        ).fetchall()
+
 
 class DataLoader:
     def __init__(
@@ -228,11 +238,26 @@ class DataLoader:
     def getDishInfo(self) -> list:
         return self._database.view_dishes()
 
+    def getAllergenInfo(self) -> list:
+        return self._database.view_allergens()
+
 
 if __name__ == "__main__":
     data = DataLoader()
     data.buildDatabase()
+
+    print("Dishes:")
     for dish, calories, fat, protein, sugar, carbs in data.getDishInfo():
         print(
             f"{dish}:\n\tcalories: {round(calories, 3)}\n\tfat: {round(fat, 3)}\n\tprotein: {round(protein, 3)}\n\tsugar: {round(sugar, 3)}\n\tcarbs: {round(carbs, 3)}"
         )
+
+    print("\nAllergens:")
+    allergens = defaultdict(list)
+    for allergen_name, ingredient in data.getAllergenInfo():
+        allergens[allergen_name].append(ingredient)
+
+    for allergen_name, ingredients in allergens.items():
+        print(f"{allergen_name}:")
+        for ingredient in ingredients:
+            print(f"\t{ingredient}")
