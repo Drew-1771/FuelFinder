@@ -17,29 +17,41 @@ extension Color {
 }
 
 struct HomeView: View {
-    
-    
-    let customColor = Color(hex: 0x474747)
+    let boxGrey = Color(hex: 0x404040)
+    let textGrey = Color(hex: 0x999999)
+
     var body: some View {
-        HStack {
-            VStack(spacing: 20){
-                PreviewBox(color: customColor, description: "one")
-                PreviewBox(color: customColor, description:  "two")
-                PreviewBox(color: customColor, description: "three")
+        VStack{
+            HStack() {
+                Text("Hello <Username>!")
+                    .font(.title)
+                    .foregroundColor(textGrey)
+                    .frame(alignment: .trailing)
+                    .padding()
                 Spacer()
-            }.padding(.horizontal, 2)
-
-            VStack(spacing: 20){
-                PreviewBox(color: customColor, description:  "four")
-                PreviewBox(color: customColor, description:  "five")
-                PreviewBox(color: customColor, description:  "six")
-                Spacer()
-            }.padding(.horizontal, 2)
-
-        }
+                SettingsCog(fgColor: .gray)
+            }
+            
+            HStack {
+                VStack(spacing: 20){
+                    PreviewBox(color: boxGrey, description: "one")
+                    PreviewBox(color: boxGrey, description:  "two")
+                    PreviewBox(color: boxGrey, description: "three")
+                    Spacer()
+                }.padding(.horizontal, 2)
+                
+                VStack(spacing: 20){
+                    PreviewBox(color: boxGrey, description:  "four")
+                    PreviewBox(color: boxGrey, description:  "five")
+                    PreviewBox(color: boxGrey, description:  "six")
+                    Spacer()
+                }.padding(.horizontal, 2)
+                
+            }
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
-            .background(Color.black)
+            
+        }.background(Color.black)
     }
 }
 
@@ -65,6 +77,23 @@ struct PreviewBox: View {
             }
             .background(color)
             .cornerRadius(10)
+        }
+    }
+}
+
+struct SettingsCog: View {
+    var fgColor: Color
+
+    var body: some View {
+        Button(action: {
+            print("selected settings")
+        }) {
+            Image(systemName: "gearshape")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30, height: 30)
+                .foregroundColor(fgColor)
+                .padding(.horizontal, 25)
         }
     }
 }
