@@ -23,10 +23,9 @@ struct HomeView: View {
     var body: some View {
         VStack{
             HStack() {
-                Text("Hello <Username>!")
+                Text("Hello Rupert!")
                     .font(.title)
                     .foregroundColor(textGrey)
-                    .frame(alignment: .trailing)
                     .padding()
                 Spacer()
                 SettingsCog(fgColor: .gray)
@@ -37,21 +36,59 @@ struct HomeView: View {
                     PreviewBox(color: boxGrey, description: "one")
                     PreviewBox(color: boxGrey, description:  "two")
                     PreviewBox(color: boxGrey, description: "three")
-                    Spacer()
                 }.padding(.horizontal, 2)
                 
                 VStack(spacing: 20){
                     PreviewBox(color: boxGrey, description:  "four")
                     PreviewBox(color: boxGrey, description:  "five")
                     PreviewBox(color: boxGrey, description:  "six")
-                    Spacer()
                 }.padding(.horizontal, 2)
-                
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            
+            VStack {
+                HStack{
+                    Text("Recommended for you")
+                        .font(.title)
+                        .foregroundColor(textGrey)
+                    Spacer()
+                }
+                
+                HScroll()
+                
+                HStack{
+                    Text("Popular foods")
+                        .font(.title)
+                        .foregroundColor(textGrey)
+                    Spacer()
+                }
+                
+                HScroll()
+
+            }.padding(.horizontal, 10)
+            
+
+            Spacer()
+
             
         }.background(Color.black)
+    }
+}
+struct HScroll: View {
+    var body: some View{
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                let colorList: [Color] = [.red, .blue, .green, .yellow, .orange]
+
+                ForEach(0..<10) { foodItem in
+                    let index = Int.random(in: 0..<colorList.count)
+                    let randomColor = colorList[index]
+                    
+                    ScrollBox(color: randomColor, description: "item \(foodItem)")
+                }
+            }
+            .padding(.horizontal, 10)
+        }
     }
 }
 
@@ -73,6 +110,29 @@ struct PreviewBox: View {
                 Text(description)
                     .foregroundColor(.white)
                     .padding()
+                Spacer()
+            }
+            .background(color)
+            .cornerRadius(10)
+        }
+    }
+}
+
+struct ScrollBox: View {
+    var color: Color
+    var description: String
+    
+    var body: some View {
+        Button(action: {
+            print("selected preview: \(description)")
+        }) {
+            HStack {
+                Image(systemName: "photo.on.rectangle")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 100, height: 100)
+                    .padding()
+                    .foregroundColor(.white)
                 Spacer()
             }
             .background(color)
