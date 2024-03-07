@@ -28,17 +28,20 @@ struct MainTabView: View {
                 .onAppear{ selectedTab = 0}
                 .tag(0)
             
-            Text("Search")
+            SearchView()
                 .tabItem {
                     VStack {
+                        
                         Image(systemName: "magnifyingglass")
                         Text("Search")
+                        
+                        
                     }
                 }
                 .onAppear{ selectedTab = 1}
                 .tag(1)
             
-            Text("Recipes")
+            RecipesView()
                 .tabItem {
                     VStack {
                         Image(systemName: selectedTab == 2 ?  "refrigerator.fill" : "refrigerator")

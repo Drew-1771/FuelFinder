@@ -16,6 +16,8 @@
 		1BC1FE5C2B8EC76400E5724B /* projectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC1FE5B2B8EC76400E5724B /* projectUITestsLaunchTests.swift */; };
 		1BC1FE792B8ED58E00E5724B /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC1FE782B8ED58E00E5724B /* MainTabView.swift */; };
 		1BEC605F2B97D9F000D22080 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BEC605E2B97D9F000D22080 /* HomeView.swift */; };
+		1BEC60622B99392D00D22080 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BEC60612B99392D00D22080 /* SearchView.swift */; };
+		1BEC60652B99406B00D22080 /* RecipesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BEC60642B99406B00D22080 /* RecipesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,8 @@
 		1BC1FE5B2B8EC76400E5724B /* projectUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = projectUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		1BC1FE782B8ED58E00E5724B /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		1BEC605E2B97D9F000D22080 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		1BEC60612B99392D00D22080 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		1BEC60642B99406B00D22080 /* RecipesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +150,8 @@
 		1BC1FE712B8ED49100E5724B /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				1BEC60632B99404C00D22080 /* Recipes */,
+				1BEC60602B99391A00D22080 /* Search */,
 				1BEC605D2B97D9DB00D22080 /* Home */,
 				1BC1FE762B8ED50900E5724B /* Root */,
 				1BC1FE772B8ED55200E5724B /* TabBar */,
@@ -203,6 +209,22 @@
 				1BEC605E2B97D9F000D22080 /* HomeView.swift */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		1BEC60602B99391A00D22080 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				1BEC60612B99392D00D22080 /* SearchView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		1BEC60632B99404C00D22080 /* Recipes */ = {
+			isa = PBXGroup;
+			children = (
+				1BEC60642B99406B00D22080 /* RecipesView.swift */,
+			);
+			path = Recipes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -335,9 +357,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BEC60622B99392D00D22080 /* SearchView.swift in Sources */,
 				1BC1FE412B8EC76300E5724B /* ContentView.swift in Sources */,
 				1BEC605F2B97D9F000D22080 /* HomeView.swift in Sources */,
 				1BC1FE3F2B8EC76300E5724B /* projectApp.swift in Sources */,
+				1BEC60652B99406B00D22080 /* RecipesView.swift in Sources */,
 				1BC1FE792B8ED58E00E5724B /* MainTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
