@@ -4,12 +4,14 @@ from pathlib import Path
 import csv
 from collections import defaultdict
 
+ROOT = Path.cwd()
+
 
 class Database:
     def __init__(self) -> None:
-        Path(Path.cwd() / "database").mkdir(exist_ok=True)
+        Path(ROOT / "database").mkdir(exist_ok=True)
 
-        self._path = Path(Path.cwd() / "database" / "database.db")
+        self._path = Path(ROOT / "database" / "database.db")
         debug(f"Database self._path set to {self._path}")
 
         # if db file is not found, perform first time setup
@@ -65,6 +67,18 @@ class Database:
                 )
                 """
             )
+
+            self._cursor.execute(
+                """
+                CREATE TABLE HEALTH
+                (
+                DATE TIMESTAMP PRIMARY KEY,
+                STEP_COUNT INT,
+                ACTIVE_CALORIES_BURNED FLOAT,
+                RESTING_CALORIES_BURNED FLOAT
+                )
+                """
+            )
             self._connection.commit()
         # else, connect
         else:
@@ -112,6 +126,21 @@ class Database:
         )
         self._connection.commit()
 
+    def addHealthStat(
+        self,
+        date: str,
+        step_count: int,
+        active_calories_burned: float,
+        resting_calories_burned: float,
+    ) -> None:
+        debug(
+            f"adding HEALTH: {date}, {step_count}, {active_calories_burned}, {resting_calories_burned}"
+        )
+        self._cursor.execute(
+            f"INSERT INTO HEALTH (DATE,STEP_COUNT,ACTIVE_CALORIES_BURNED,RESTING_CALORIES_BURNED) VALUES ('{date}', {step_count}, {active_calories_burned}, {resting_calories_burned});"
+        )
+        self._connection.commit()
+
     def view_dishes(self) -> list:
         self._connection.execute("PRAGMA foreign_keys = ON")
         return self._cursor.execute(
@@ -141,12 +170,12 @@ class DataLoader:
         ingredients: str = "INGREDIENTS",
         allergens: str = "ALLERGEN",
     ) -> None:
-        self._path = Path(Path.cwd() / "data")
+        self._path = Path(ROOT / "data")
         debug(f"Dataloader._path set to {self._path}")
 
-        if Path(Path.cwd() / "database" / "database.db").exists():
+        if Path(ROOT / "database" / "database.db").exists():
             debug("removing old database.db")
-            Path(Path.cwd() / "database" / "database.db").unlink()
+            Path(ROOT / "database" / "database.db").unlink()
 
         self._database = Database()
 
@@ -155,7 +184,7 @@ class DataLoader:
         self._ingredients = ingredients
         self._allergens = allergens
 
-    def buildDatabase(self) -> None:
+    def buildDatabase(self, health_stats: Path) -> None:
         dishes, ingredients, dishes_to_ingredients, allergen = True, True, True, True
 
         # run until all is build in correct order
@@ -235,6 +264,29 @@ class DataLoader:
                             )
                     dishes_to_ingredients = False
 
+        if health_stats.exists():
+            self.buildHealthInfo(health_stats)
+
+    def buildHealthInfo(self, health_stats: Path) -> None:
+        # build health table
+        debug(f"reading {health_stats.name}")
+        with open(health_stats, "r") as file:
+            data = list(csv.reader(file))
+
+            for (
+                index,
+                date,
+                step_count,
+                active_calories_burned,
+                resting_calories_burned,
+            ) in data[1:]:
+                self._database.addHealthStat(
+                    str.lower(date).strip(),
+                    int(str.lower(step_count).strip()),
+                    float(str.lower(active_calories_burned).strip()),
+                    float(str.lower(resting_calories_burned).strip()),
+                )
+
     def getDishInfo(self) -> list:
         return self._database.view_dishes()
 
@@ -244,7 +296,7 @@ class DataLoader:
 
 if __name__ == "__main__":
     data = DataLoader()
-    data.buildDatabase()
+    data.buildDatabase(ROOT / "data" / "health_data.csv")
 
     print("Dishes:")
     for dish, calories, fat, protein, sugar, carbs in data.getDishInfo():
