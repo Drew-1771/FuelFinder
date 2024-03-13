@@ -23,11 +23,25 @@ class Database:
 
             self._cursor.execute(
                 """
+                CREATE TABLE USERS
+                (
+                ID INTEGER PRIMARY KEY,
+                HEIGHT INTEGER,
+                WEIGHT FLOAT,
+                SEX CHAR(8),
+                AGE INTEGER
+                )
+                """
+            )
+
+            self._cursor.execute(
+                """
                 CREATE TABLE DISHES
                 (
                 DISH VARCHAR(256) PRIMARY KEY,
                 CUISINE VARCHAR(256),
-                RECIPE VARCHAR(256)
+                RECIPE VARCHAR(256),
+                USES INT DEFAULT 0
                 )
                 """
             )
@@ -70,21 +84,40 @@ class Database:
 
             self._cursor.execute(
                 """
+                CREATE TABLE USER_ALLERGENS
+                (
+                ID INTEGER REFERENCES USERS(ID),
+                ALLERGEN_NAME VARCHAR(256)
+                )
+                """
+            )
+
+            self._cursor.execute(
+                """
                 CREATE TABLE HEALTH
                 (
                 DATE TIMESTAMP PRIMARY KEY,
+                ID INTEGER REFERENCES USERS(ID),
                 STEP_COUNT INT,
                 ACTIVE_CALORIES_BURNED FLOAT,
                 RESTING_CALORIES_BURNED FLOAT
                 )
                 """
             )
+
             self._connection.commit()
         # else, connect
         else:
             self._connection = sqlite3.connect(self._path)
             self._cursor = self._connection.cursor()
         debug(f"Connected to database @ {str(self._path)}")
+
+    def addUser(self, id: int, height: int, weight: float, sex: str, age: int) -> None:
+        debug(f"adding USER: {id}, {height}, {weight}, {sex}, {age}")
+        self._cursor.execute(
+            f"INSERT INTO USERS (ID,HEIGHT,WEIGHT,SEX,AGE) VALUES ({id}, {height}, {weight}, '{sex}', {age});"
+        )
+        self._connection.commit()
 
     def addDish(self, dish: str, cuisine: str, recipe: str) -> None:
         debug(f"adding DISH: {dish}, {cuisine}, {recipe}")
@@ -126,18 +159,29 @@ class Database:
         )
         self._connection.commit()
 
+    def addUserAllergen(self, id: int, allergen_name: str) -> None:
+        debug(f"adding USER_ALLERGENS: {id}, {allergen_name}")
+        self._connection.execute("PRAGMA foreign_keys = ON")
+        self._cursor.execute(
+            f"INSERT INTO USER_ALLERGENS (ID,ALLERGEN_NAME) VALUES ({id}, '{allergen_name}');"
+        )
+        self._connection.commit()
+
     def addHealthStat(
         self,
         date: str,
+        user_id: int,
         step_count: int,
         active_calories_burned: float,
         resting_calories_burned: float,
     ) -> None:
         debug(
-            f"adding HEALTH: {date}, {step_count}, {active_calories_burned}, {resting_calories_burned}"
+            f"adding HEALTH: {date}, {step_count}, {active_calories_burned}, {resting_calories_burned}",
+            debug=False,
         )
+        self._connection.execute("PRAGMA foreign_keys = ON")
         self._cursor.execute(
-            f"INSERT INTO HEALTH (DATE,STEP_COUNT,ACTIVE_CALORIES_BURNED,RESTING_CALORIES_BURNED) VALUES ('{date}', {step_count}, {active_calories_burned}, {resting_calories_burned});"
+            f"INSERT INTO HEALTH (DATE,ID,STEP_COUNT,ACTIVE_CALORIES_BURNED,RESTING_CALORIES_BURNED) VALUES ('{date}', {user_id}, {step_count}, {active_calories_burned}, {resting_calories_burned});"
         )
         self._connection.commit()
 
@@ -165,10 +209,12 @@ class Database:
 class DataLoader:
     def __init__(
         self,
+        users: str = "USERS",
         dishes: str = "DISHES",
         dish_to_ingredient: str = "DISH_TO_INGREDIENT",
         ingredients: str = "INGREDIENTS",
         allergens: str = "ALLERGEN",
+        user_allergens: str = "USER_ALLERGENS",
     ) -> None:
         self._path = Path(ROOT / "data")
         debug(f"Dataloader._path set to {self._path}")
@@ -179,16 +225,32 @@ class DataLoader:
 
         self._database = Database()
 
+        self._users = users
         self._dishes = dishes
         self._dish_to_ingredient = dish_to_ingredient
         self._ingredients = ingredients
         self._allergens = allergens
+        self._user_allergens = user_allergens
 
-    def buildDatabase(self, health_stats: Path) -> None:
-        dishes, ingredients, dishes_to_ingredients, allergen = True, True, True, True
+    def buildDatabase(self) -> None:
+        dishes, ingredients, dishes_to_ingredients, allergen, users, user_allergen = (
+            True,
+            True,
+            True,
+            True,
+            True,
+            True,
+        )
 
         # run until all is build in correct order
-        while dishes or ingredients or dishes_to_ingredients or allergen:
+        while (
+            dishes
+            or ingredients
+            or dishes_to_ingredients
+            or allergen
+            or users
+            or user_allergen
+        ):
             for filename in Path(self._path).iterdir():
 
                 # build dishes table
@@ -233,6 +295,7 @@ class DataLoader:
                     allergen
                     and (not ingredients)
                     and (self._allergens in filename.name)
+                    and (not self._user_allergens in filename.name)
                 ):
                     debug(f"reading {filename.name}")
                     with open(filename, "r") as file:
@@ -264,28 +327,83 @@ class DataLoader:
                             )
                     dishes_to_ingredients = False
 
-        if health_stats.exists():
-            self.buildHealthInfo(health_stats)
+                # build users table
+                if (
+                    users
+                    and not self._user_allergens in filename.name
+                    and self._users in filename.name
+                ):
+                    debug(f"reading {filename.name}")
+                    with open(filename, "r") as file:
+                        data = list(csv.reader(file))
 
-    def buildHealthInfo(self, health_stats: Path) -> None:
-        # build health table
+                        ids = list()
+                        for id, height, weight, sex, age in data[1:]:
+                            self._database.addUser(
+                                int(str.lower(id).strip()),
+                                int(str.lower(height).strip()) if height != "" else -1,
+                                (
+                                    float(str.lower(weight).strip())
+                                    if weight != ""
+                                    else -1
+                                ),
+                                str.lower(sex).strip(),
+                                int(str.lower(age).strip()) if age != "" else -1,
+                            )
+                            ids.append(id)
+
+                        for id in ids:
+                            possible_path_to_health_stats = (
+                                self._path / f"health_stats - health_data_user{id}.csv"
+                            )
+                            if possible_path_to_health_stats.exists():
+                                self.buildHealthInfo(
+                                    id,
+                                    possible_path_to_health_stats,
+                                )
+                                pass
+                    users = False
+
+                # build users_allergens table
+                if (
+                    user_allergen
+                    and not users
+                    and not allergen
+                    and (not self._users in filename.name)
+                    and (self._user_allergens in filename.name)
+                ):
+                    debug(f"reading {filename.name}")
+                    with open(filename, "r") as file:
+                        data = list(csv.reader(file))
+                        print(data)
+                        for id, allergen_name in data[1:]:
+                            self._database.addUserAllergen(
+                                int(str.lower(id).strip()),
+                                str.lower(allergen_name).strip(),
+                            )
+                    user_allergen = False
+
+    def buildHealthInfo(self, id_target: int, health_stats: Path) -> None:
         debug(f"reading {health_stats.name}")
         with open(health_stats, "r") as file:
             data = list(csv.reader(file))
 
             for (
+                id,
                 index,
                 date,
                 step_count,
                 active_calories_burned,
                 resting_calories_burned,
             ) in data[1:]:
-                self._database.addHealthStat(
-                    str.lower(date).strip(),
-                    int(str.lower(step_count).strip()),
-                    float(str.lower(active_calories_burned).strip()),
-                    float(str.lower(resting_calories_burned).strip()),
-                )
+                if id == id_target:
+                    self._database.addHealthStat(
+                        str.lower(date).strip(),
+                        id,
+                        int(str.lower(step_count).strip()),
+                        float(str.lower(active_calories_burned).strip()),
+                        float(str.lower(resting_calories_burned).strip()),
+                    )
 
     def getDishInfo(self) -> list:
         return self._database.view_dishes()
@@ -296,7 +414,7 @@ class DataLoader:
 
 if __name__ == "__main__":
     data = DataLoader()
-    data.buildDatabase(ROOT / "data" / "health_data.csv")
+    data.buildDatabase()
 
     print("Dishes:")
     for dish, calories, fat, protein, sugar, carbs in data.getDishInfo():
