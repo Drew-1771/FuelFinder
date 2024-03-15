@@ -4,8 +4,10 @@ from pathlib import Path
 import csv
 from collections import defaultdict
 from json_writer import DataManager
+from recommendation import recommend
 
 ROOT = Path.cwd()
+ID = 42  # id for testing
 
 
 class Database:
@@ -120,10 +122,10 @@ class Database:
         )
         self._connection.commit()
 
-    def addDish(self, dish: str, cuisine: str, recipe: str) -> None:
+    def addDish(self, dish: str, cuisine: str, recipe: str, uses: int) -> None:
         debug(f"adding DISH: {dish}, {cuisine}, {recipe}")
         self._cursor.execute(
-            f"INSERT INTO DISHES (DISH, CUISINE, RECIPE) VALUES ('{dish}', '{cuisine}', '{recipe}');"
+            f"INSERT INTO DISHES (DISH, CUISINE, RECIPE, USES) VALUES ('{dish}', '{cuisine}', '{recipe}', '{uses}');"
         )
         self._connection.commit()
 
@@ -190,11 +192,29 @@ class Database:
         self._connection.execute("PRAGMA foreign_keys = ON")
         return self._cursor.execute(
             """
-                SELECT d.DISH, SUM(i.CALORIES * d.AMOUNT), SUM(i.FAT * d.AMOUNT), SUM(i.PROTEIN * d.AMOUNT), SUM(i.SUGAR * d.AMOUNT), SUM(i.CARBS * d.AMOUNT)
-                FROM DISH_TO_INGREDIENTS as d, INGREDIENTS as i
-                WHERE d.INGREDIENT = i.INGREDIENT
-                GROUP BY d.DISH;
-                """
+            SELECT d.DISH, SUM(i.CALORIES * d.AMOUNT), SUM(i.FAT * d.AMOUNT), SUM(i.PROTEIN * d.AMOUNT), SUM(i.SUGAR * d.AMOUNT), SUM(i.CARBS * d.AMOUNT)
+            FROM DISH_TO_INGREDIENTS as d, INGREDIENTS as i
+            WHERE d.INGREDIENT = i.INGREDIENT
+            GROUP BY d.DISH;
+            """
+        ).fetchall()
+
+    def view_user(self, id: int) -> list:
+        self._connection.execute("PRAGMA foreign_keys = ON")
+        return self._cursor.execute(
+            f"""
+            SELECT * FROM USERS as u
+            WHERE u.id = {id}
+            """
+        ).fetchall()
+
+    def view_health(self, id: int) -> list:
+        self._connection.execute("PRAGMA foreign_keys = ON")
+        return self._cursor.execute(
+            f"""
+            SELECT * FROM HEALTH as h
+            WHERE h.id = {id}
+            """
         ).fetchall()
 
     def view_allergens(self) -> list:
@@ -204,6 +224,24 @@ class Database:
                 SELECT ALLERGEN_NAME, INGREDIENT
                 FROM ALLERGEN as a
                 """
+        ).fetchall()
+
+    def view_recipes_for_user(self, id: int) -> list:
+        self._connection.execute("PRAGMA foreign_keys = ON")
+        return self._cursor.execute(
+            f"""
+            SELECT d.DISH, d.RECIPE FROM DISHES as d
+            WHERE d.DISH NOT IN
+            (SELECT dti.DISH FROM DISH_TO_INGREDIENTS as dti
+            WHERE dti.INGREDIENT IN
+            (SELECT a.INGREDIENT FROM
+            ALLERGEN as a
+            WHERE a.ALLERGEN_NAME IN 
+            (SELECT ua.ALLERGEN_NAME from USER_ALLERGENS as ua
+            WHERE ua.id = {id})
+            GROUP BY a.INGREDIENT)
+            GROUP BY dti.DISH)
+            """
         ).fetchall()
 
 
@@ -409,6 +447,15 @@ class DataLoader:
     def getDishInfo(self) -> list:
         return self._database.view_dishes()
 
+    def getUserInfo(self, id: int) -> list:
+        return self._database.view_user(id)
+
+    def getHealthInfo(self, id: int) -> list:
+        return self._database.view_health(id)
+
+    def getValidRecipes(self, id: int):
+        return self._database.view_recipes_for_user(id)
+
     def getAllergenInfo(self) -> list:
         return self._database.view_allergens()
 
@@ -417,6 +464,7 @@ if __name__ == "__main__":
     data = DataLoader()
     data.buildDatabase()
 
+    # show initial dishes and allergies setup
     print("Dishes:")
     dishes = dict()
     for dish, calories, fat, protein, sugar, carbs in data.getDishInfo():
@@ -431,10 +479,6 @@ if __name__ == "__main__":
             f"{dish}:\n\tcalories: {round(calories, 3)}\n\tfat: {round(fat, 3)}\n\tprotein: {round(protein, 3)}\n\tsugar: {round(sugar, 3)}\n\tcarbs: {round(carbs, 3)}"
         )
 
-    Path(ROOT / "data" / "json").mkdir(exist_ok=True)
-    dishes_data = DataManager(ROOT / "data" / "json" / "dishes.json")
-    dishes_data.write(dishes)
-
     print("\nAllergens:")
     allergens = defaultdict(list)
     for allergen_name, ingredient in data.getAllergenInfo():
@@ -444,3 +488,29 @@ if __name__ == "__main__":
         print(f"{allergen_name}:")
         for ingredient in ingredients:
             print(f"\t{ingredient}")
+
+    # export dishes data
+    Path(ROOT / "data" / "json").mkdir(exist_ok=True)
+    dishes_data = DataManager(ROOT / "data" / "json" / "dishes.json")
+    dishes_data.write(dishes)
+
+    # preprocess and remove allergies for the user
+    recipes = defaultdict(str)
+    for item in data.getValidRecipes(ID):
+        recipes[str(item[0])] = str(item[1])
+
+    # export valid recipes data
+    recipe_data = DataManager(ROOT / "data" / "json" / "recipes.json")
+    recipe_data.write(recipes)
+
+    # calculate recommendations
+    recommendations = recommend(ID, data, dishes, recipes)
+    print("\nRecommending:")
+    for index in range(5):
+        print(f"\tRank {index+1}:\t{recommendations[index]}")
+
+    # export recommendations
+    recommendation_data = DataManager(
+        ROOT / "data" / "json" / f"recommendation_user.json"
+    )
+    recommendation_data.write(recommendations)

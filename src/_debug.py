@@ -1,6 +1,6 @@
 _DEBUG_FLAG = True
 
 
-def debug(message: str, debug=_DEBUG_FLAG) -> None:
-    if _DEBUG_FLAG:
-        print(">>> " + message)
+def debug(message, debug=_DEBUG_FLAG) -> None:
+    if debug:
+        print(">>> " + str(message))

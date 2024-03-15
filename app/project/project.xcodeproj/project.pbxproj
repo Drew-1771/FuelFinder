@@ -21,6 +21,12 @@
 		1BEC60692BA25D6A00D22080 /* dishes.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC60682BA25D6A00D22080 /* dishes.json */; };
 		1BEC606C2BA3C68400D22080 /* dishes.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC60682BA25D6A00D22080 /* dishes.json */; };
 		1BEC606D2BA3C68400D22080 /* dishes.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC60682BA25D6A00D22080 /* dishes.json */; };
+		1BEC606F2BA3E8BB00D22080 /* recipes.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC606E2BA3E8BB00D22080 /* recipes.json */; };
+		1BEC60702BA3E8BB00D22080 /* recipes.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC606E2BA3E8BB00D22080 /* recipes.json */; };
+		1BEC60712BA3E8BB00D22080 /* recipes.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC606E2BA3E8BB00D22080 /* recipes.json */; };
+		1BEC60772BA4073500D22080 /* recommendation_user.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC60762BA4073400D22080 /* recommendation_user.json */; };
+		1BEC60782BA4073500D22080 /* recommendation_user.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC60762BA4073400D22080 /* recommendation_user.json */; };
+		1BEC60792BA4073500D22080 /* recommendation_user.json in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC60762BA4073400D22080 /* recommendation_user.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +62,8 @@
 		1BEC60612B99392D00D22080 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		1BEC60642B99406B00D22080 /* RecipesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipesView.swift; sourceTree = "<group>"; };
 		1BEC60682BA25D6A00D22080 /* dishes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dishes.json; sourceTree = SOURCE_ROOT; };
+		1BEC606E2BA3E8BB00D22080 /* recipes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recipes.json; sourceTree = "<group>"; };
+		1BEC60762BA4073400D22080 /* recommendation_user.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = recommendation_user.json; path = ../../../../data/json/recommendation_user.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +243,8 @@
 		1BEC60672BA25D4A00D22080 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				1BEC60762BA4073400D22080 /* recommendation_user.json */,
+				1BEC606E2BA3E8BB00D22080 /* recipes.json */,
 				1BEC60682BA25D6A00D22080 /* dishes.json */,
 			);
 			path = Data;
@@ -347,6 +357,8 @@
 				1BEC60692BA25D6A00D22080 /* dishes.json in Resources */,
 				1BC1FE462B8EC76400E5724B /* Preview Assets.xcassets in Resources */,
 				1BC1FE432B8EC76400E5724B /* Assets.xcassets in Resources */,
+				1BEC60772BA4073500D22080 /* recommendation_user.json in Resources */,
+				1BEC606F2BA3E8BB00D22080 /* recipes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -355,6 +367,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1BEC606C2BA3C68400D22080 /* dishes.json in Resources */,
+				1BEC60782BA4073500D22080 /* recommendation_user.json in Resources */,
+				1BEC60702BA3E8BB00D22080 /* recipes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,6 +377,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1BEC606D2BA3C68400D22080 /* dishes.json in Resources */,
+				1BEC60792BA4073500D22080 /* recommendation_user.json in Resources */,
+				1BEC60712BA3E8BB00D22080 /* recipes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

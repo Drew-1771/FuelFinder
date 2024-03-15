@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 struct HomeView: View {
     let boxGrey = Color(hex: 0x404040)
     let textGrey = Color(hex: 0x999999)
@@ -44,8 +45,7 @@ struct HomeView: View {
                         .foregroundColor(textGrey)
                     Spacer()
                 }
-                
-                HScroll()
+                HScroll(forward: true, recommendations: loadRecommendationsForYou())
                 
                 HStack{
                     Text("Popular foods")
@@ -54,7 +54,7 @@ struct HomeView: View {
                     Spacer()
                 }
                 
-                HScroll()
+               HScroll(forward: false, recommendations: loadRecommendationsPopular())
 
             }.padding(.horizontal, 10)
             
@@ -64,18 +64,97 @@ struct HomeView: View {
             
         }.background(Color.black)
     }
+    
+    func loadJSONData(from filename: String) -> [String: String]? {
+        if let url = Bundle.main.url(forResource: filename, withExtension: "json") {
+            do {
+                let data = try Data(contentsOf: url)
+                // convert json data to any object
+                let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+                //print("json object:")
+                //print(jsonObject)
+                
+                // convert any object to [String: Any] dictionary
+                guard let jsonDictionary = jsonObject as? [String: String] else {
+                    print("Error converting to dictionary")
+                    return nil
+                }
+                
+                //print("json dictionary:")
+                //print(jsonDictionary)
+                
+                return jsonDictionary
+            } catch {
+                print("[!] error loading json data: \(error.localizedDescription)")
+                return nil
+            }
+        } else {
+            print("[!] file not found")
+            return nil
+        }
+    }
+    
+    func loadRecommendationsForYou(debug: Bool=false) -> [String] {
+        var recommendationDataArray = [String]()
+
+        if let jsonDictionary = loadJSONData(from: "recommendation_user") {
+            let sortedKeys = Array(jsonDictionary.keys).sorted(by: { $0 < $1 })
+            for key in sortedKeys {
+                if let dishName = jsonDictionary[key] {
+                    recommendationDataArray.append(dishName)
+                }
+            }
+        }
+        
+        if debug == true {
+            for dish in recommendationDataArray{
+                print(dish)
+            }
+        }
+        return recommendationDataArray
+    }
+    
+    func loadRecommendationsPopular(debug: Bool=false) -> [String] {
+        var recommendationDataArray = [String]()
+
+        if let jsonDictionary = loadJSONData(from: "recommendation_popular") {
+            let sortedKeys = Array(jsonDictionary.keys).sorted(by: { $0 < $1 })
+            for key in sortedKeys {
+                if let dishName = jsonDictionary[key] {
+                    recommendationDataArray.append(dishName)
+                }
+            }
+        }
+        
+        if debug == true {
+            for dish in recommendationDataArray{
+                print(dish)
+            }
+        }
+        return recommendationDataArray
+    }
+    
 }
+
 struct HScroll: View {
+    let forward: Bool
+    let recommendations: [String]
+    
     var body: some View{
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 let colorList: [Color] = [.red, .blue, .green, .yellow, .orange]
-
-                ForEach(0..<10) { foodItem in
-                    let index = Int.random(in: 0..<colorList.count)
-                    let randomColor = colorList[index]
-                    
-                    ScrollBox(color: randomColor, description: "item \(foodItem)")
+                let colorListB: [Color] = [.orange, .blue, .green, .red, .yellow]
+                
+                if forward == true {
+                    ForEach(Array(colorList.enumerated()), id: \.offset) { index, color in
+                        ScrollBox(color: color, description: " \(recommendations[index])")
+                    }
+                }
+                else
+                {
+                    ForEach(Array(colorListB.enumerated()), id: \.offset) { index, color in ScrollBox(color: color, description: " \(recommendations[index])")
+                    }
                 }
             }
             .padding(.horizontal, 10)
@@ -147,6 +226,7 @@ struct SettingsCog: View {
                 .padding(.horizontal, 25)
         }
     }
+    
 }
 
 #Preview {

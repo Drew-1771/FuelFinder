@@ -36,14 +36,46 @@ struct SearchView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.horizontal, 2)
                     
+                }.padding()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        ForEach(dishes, id: \.name) { dish in
+                            DishObject(dish: dish)
+                        }
+                    }
+                    .padding()
                 }
+                
+                
             }.background(Color.black)
             Spacer()
         }.background(Color.black)
-            .onAppear{_ = loadDishes(debug: true)}
+            .onAppear{dishes = loadDishes()}
         .onChange(of: searchText) {
-            search(searchText)
+            dishes = search(query:searchText, dish_array:dishes)
                 }
+    }
+    
+    struct DishObject: View {
+        let boxGrey = Color(hex: 0x404040)
+        let textGrey = Color(hex: 0x999999)
+
+        let dish: Dish
+        var body: some View {
+            VStack() {
+                Text(dish.name)
+                    .font(.system(size:26))
+                    .foregroundColor(textGrey)
+                Text("Calories: \(Int(dish.calories))").foregroundColor(textGrey)
+                Text("Fat: \(Int(dish.fat))").foregroundColor(textGrey)
+                Text("Protein: \(Int(dish.protein))").foregroundColor(textGrey)
+                Text("Sugar: \(Int(dish.sugar))").foregroundColor(textGrey)
+                Text("Carbs: \(Int(dish.carbs))").foregroundColor(textGrey)
+            }
+            .cornerRadius(10)
+            .padding(.vertical, 5)
+            }
     }
     
     func loadJSONData(from filename: String) -> [String: Any]? {
@@ -75,7 +107,7 @@ struct SearchView: View {
         }
     }
     
-    func loadDishes(debug: Bool=false) -> [Dish]? {
+    func loadDishes(debug: Bool=false) -> [Dish] {
         var dishDataArray = [Dish]()
         
         let jsonDictionary = loadJSONData(from: "dishes")
@@ -105,12 +137,27 @@ struct SearchView: View {
         return dishDataArray
     }
     
-    func search(_ query: String)
+    func search(query: String, dish_array: [Dish]) -> [Dish]
     {
-        // for string in query
-        // calculate distances
-        // return highest distance
         print(query)
+        
+        // for string in query
+        var score = [(Double, Dish)]()
+        for dish in dish_array{
+            // calculate distances
+            let lev_score = levenshteinDistanceScore(string1: query, string2: dish.name)
+            score.append((lev_score, dish))
+        }
+        // sort and return highest distance
+        let sortedScore = score.sorted { $0.0 > $1.0 }
+        
+        var sortedDishArray = [Dish]()
+        for (_, dish) in sortedScore
+        {
+            sortedDishArray.append(dish)
+        }
+        
+        return sortedDishArray
     }
     
     func levenshteinDistanceScore(string1: String, string2: String) ->
