@@ -43,7 +43,7 @@ struct RecipesView: View {
             }
 
         }.background(Color.black)
-            .onAppear{recipes = loadRecipes(debug: true)}
+            .onAppear{recipes = loadRecipes()}
     }
     
     func loadJSONData(from filename: String) -> [String: Any]? {

@@ -244,6 +244,15 @@ class Database:
             """
         ).fetchall()
 
+    def view_recipes_for_popular(self) -> list:
+        self._connection.execute("PRAGMA foreign_keys = ON")
+        return self._cursor.execute(
+            f"""
+            SELECT d.DISH, d.USES FROM DISHES as d
+            GROUP BY d.DISH
+            """
+        ).fetchall()
+
 
 class DataLoader:
     def __init__(
@@ -298,11 +307,12 @@ class DataLoader:
                     with open(filename, "r") as file:
                         data = list(csv.reader(file))
 
-                        for dish, cuisine, recipe in data[1:]:
+                        for dish, cuisine, recipe, uses in data[1:]:
                             self._database.addDish(
                                 str.lower(dish).strip(),
                                 str.lower(cuisine).strip(),
                                 str.lower(recipe).strip(),
+                                int(str.lower(uses).strip()),
                             )
                     dishes = False
 
@@ -459,6 +469,9 @@ class DataLoader:
     def getAllergenInfo(self) -> list:
         return self._database.view_allergens()
 
+    def getPopularDishes(self) -> list:
+        return self._database.view_recipes_for_popular()
+
 
 if __name__ == "__main__":
     data = DataLoader()
@@ -503,6 +516,23 @@ if __name__ == "__main__":
     recipe_data = DataManager(ROOT / "data" / "json" / "recipes.json")
     recipe_data.write(recipes)
 
+    # calculate popular foods
+    popular, recommendations_p = data.getPopularDishes(), defaultdict(str)
+    popular.sort(key=lambda x: x[1], reverse=True)
+
+    # get popular foods
+    print("\nPopular Dishes:")
+    for item, uses in popular:
+        print(f"\tUses: {uses} \t{item}")
+
+    for index in range(5):
+        recommendations_p[index] = popular[index][0]
+    # export popular foods
+    recommendation_popular = DataManager(
+        ROOT / "data" / "json" / "recommendation_popular.json"
+    )
+    recommendation_popular.write(recommendations_p)
+
     # calculate recommendations
     recommendations = recommend(ID, data, dishes, recipes)
     print("\nRecommending:")
@@ -511,6 +541,6 @@ if __name__ == "__main__":
 
     # export recommendations
     recommendation_data = DataManager(
-        ROOT / "data" / "json" / f"recommendation_user.json"
+        ROOT / "data" / "json" / "recommendation_user.json"
     )
     recommendation_data.write(recommendations)

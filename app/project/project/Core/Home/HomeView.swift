@@ -144,7 +144,7 @@ struct HScroll: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 let colorList: [Color] = [.red, .blue, .green, .yellow, .orange]
-                let colorListB: [Color] = [.orange, .blue, .green, .red, .yellow]
+                let colorListB: [Color] = [.orange, .mint, .red, .green, .yellow]
                 
                 if forward == true {
                     ForEach(Array(colorList.enumerated()), id: \.offset) { index, color in
