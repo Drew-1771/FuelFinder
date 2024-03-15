@@ -40,13 +40,13 @@ struct SearchView: View {
             }.background(Color.black)
             Spacer()
         }.background(Color.black)
-            .onAppear{loadDishes()}
+            .onAppear{_ = loadDishes(debug: true)}
         .onChange(of: searchText) {
             search(searchText)
                 }
     }
     
-    func loadJSONData(from filename: String) -> [Dish]? {
+    func loadJSONData(from filename: String) -> [String: Any]? {
         if let url = Bundle.main.url(forResource: filename, withExtension: "json") {
             do {
                 let data = try Data(contentsOf: url)
@@ -64,23 +64,7 @@ struct SearchView: View {
                 //print("json dictionary:")
                 //print(jsonDictionary)
                 
-                var dishDataArray = [Dish]()
-                    
-                for (dishName, nutritionInformation) in jsonDictionary {
-                    guard let nutritionDict = nutritionInformation as? [String: Any],
-                          let calories = nutritionDict["calories"] as? Double,
-                          let fat = nutritionDict["fat"] as? Double,
-                          let protein = nutritionDict["protein"] as? Double,
-                          let sugar = nutritionDict["sugar"] as? Double,
-                          let carbs = nutritionDict["carbs"] as? Double else {
-                        continue
-                    }
-                    
-                    let dishData = Dish(name: dishName, calories: calories, fat: fat, protein: protein, sugar: sugar, carbs: carbs)
-                    dishDataArray.append(dishData)
-                }
-                return dishDataArray
-
+                return jsonDictionary
             } catch {
                 print("[!] error loading json data: \(error.localizedDescription)")
                 return nil
@@ -91,23 +75,34 @@ struct SearchView: View {
         }
     }
     
-    func loadDishes(debug: Bool=false) {
-        if let dishes = loadJSONData(from: "dishes") {
-            
-            if debug == true {
-                // Use the loaded dish data
-                for dish in dishes {
-                    print("Dish Name: \(dish.name)")
-                    print("Calories: \(dish.calories)")
-                    print("Fat: \(dish.fat)")
-                    print("Protein: \(dish.protein)")
-                    print("Sugar: \(dish.sugar)")
-                    print("Carbs: \(dish.carbs)\n")
-                }
+    func loadDishes(debug: Bool=false) -> [Dish]? {
+        var dishDataArray = [Dish]()
+        
+        let jsonDictionary = loadJSONData(from: "dishes")
+        for (dishName, nutritionInformation) in jsonDictionary ?? [:] {
+            guard let nutritionDict = nutritionInformation as? [String: Any],
+                  let calories = nutritionDict["calories"] as? Double,
+                  let fat = nutritionDict["fat"] as? Double,
+                  let protein = nutritionDict["protein"] as? Double,
+                  let sugar = nutritionDict["sugar"] as? Double,
+                  let carbs = nutritionDict["carbs"] as? Double else {
+                continue
             }
-        } else {
-            print("Failed to load JSON data")
+            let dishData = Dish(name: dishName, calories: calories, fat: fat, protein: protein, sugar: sugar, carbs: carbs)
+            dishDataArray.append(dishData)
         }
+        
+        if debug == true {
+            for dish in dishDataArray{
+                print("Dish Name: \(dish.name)")
+                print("Calories: \(dish.calories)")
+                print("Fat: \(dish.fat)")
+                print("Protein: \(dish.protein)")
+                print("Sugar: \(dish.sugar)")
+                print("Carbs: \(dish.carbs)\n")
+            }
+        }
+        return dishDataArray
     }
     
     func search(_ query: String)
