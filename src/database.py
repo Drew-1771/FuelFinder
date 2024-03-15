@@ -3,6 +3,7 @@ import sqlite3
 from pathlib import Path
 import csv
 from collections import defaultdict
+from json_writer import DataManager
 
 ROOT = Path.cwd()
 
@@ -417,10 +418,22 @@ if __name__ == "__main__":
     data.buildDatabase()
 
     print("Dishes:")
+    dishes = dict()
     for dish, calories, fat, protein, sugar, carbs in data.getDishInfo():
+        dishes[dish] = {
+            "calories": round(calories, 3),
+            "fat": round(fat, 3),
+            "protein": round(protein, 3),
+            "sugar": round(sugar, 3),
+            "carbs": round(carbs, 3),
+        }
         print(
             f"{dish}:\n\tcalories: {round(calories, 3)}\n\tfat: {round(fat, 3)}\n\tprotein: {round(protein, 3)}\n\tsugar: {round(sugar, 3)}\n\tcarbs: {round(carbs, 3)}"
         )
+
+    Path(ROOT / "data" / "json").mkdir(exist_ok=True)
+    dishes_data = DataManager(ROOT / "data" / "json" / "dishes.json")
+    dishes_data.write(dishes)
 
     print("\nAllergens:")
     allergens = defaultdict(list)
