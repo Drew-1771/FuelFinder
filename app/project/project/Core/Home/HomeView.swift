@@ -25,15 +25,15 @@ struct HomeView: View {
             
             HStack {
                 VStack(spacing: 20){
-                    PreviewBox(color: boxGrey, description: "one")
-                    PreviewBox(color: boxGrey, description:  "two")
-                    PreviewBox(color: boxGrey, description: "three")
+                    PreviewBox(color: boxGrey, description: "bacon egg and cheese sandwich")
+                    PreviewBox(color: boxGrey, description:  "blueberry muffins")
+                    PreviewBox(color: boxGrey, description: "homemade pizza")
                 }.padding(.horizontal, 2)
                 
                 VStack(spacing: 20){
-                    PreviewBox(color: boxGrey, description:  "four")
-                    PreviewBox(color: boxGrey, description:  "five")
-                    PreviewBox(color: boxGrey, description:  "six")
+                    PreviewBox(color: boxGrey, description:  "fettuccine alfredo")
+                    PreviewBox(color: boxGrey, description:  "chicken casserole")
+                    PreviewBox(color: boxGrey, description:  "stir fry")
                 }.padding(.horizontal, 2)
             }
             .padding(.horizontal, 20)
@@ -168,7 +168,7 @@ struct PreviewBox: View {
     
     var body: some View {
         Button(action: {
-            print("selected preview: \(description)")
+            print("selected preview:  \(description)")
         }) {
             HStack {
                 Image(systemName: "photo.on.rectangle")
@@ -177,9 +177,6 @@ struct PreviewBox: View {
                     .frame(width: 30, height: 30)
                     .padding()
                     .foregroundColor(.white)
-                Text(description)
-                    .foregroundColor(.white)
-                    .padding()
                 Spacer()
             }
             .background(color)

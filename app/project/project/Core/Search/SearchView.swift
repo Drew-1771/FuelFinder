@@ -29,11 +29,12 @@ struct SearchView: View {
             {
                 HStack{
                     Spacer()
-                    Image(systemName: "magnifyingglass").foregroundColor(textGrey)
+                    Image(systemName: "magnifyingglass").resizable().foregroundColor(textGrey)
                         .padding(.horizontal, 2)
+                        .frame(width: 40, height: 40)
                     TextField("Search", text: $searchText)
                         .padding()
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textFieldStyle(CustomRoundedBorderTextFieldStyle())
                         .padding(.horizontal, 2)
                     
                 }.padding()
@@ -41,7 +42,7 @@ struct SearchView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         ForEach(dishes, id: \.name) { dish in
-                            DishObject(dish: dish)
+                            PreviewBox(color:boxGrey, dish: dish)
                         }
                     }
                     .padding()
@@ -55,27 +56,6 @@ struct SearchView: View {
         .onChange(of: searchText) {
             dishes = search(query:searchText, dish_array:dishes)
                 }
-    }
-    
-    struct DishObject: View {
-        let boxGrey = Color(hex: 0x404040)
-        let textGrey = Color(hex: 0x999999)
-
-        let dish: Dish
-        var body: some View {
-            VStack() {
-                Text(dish.name)
-                    .font(.system(size:26))
-                    .foregroundColor(textGrey)
-                Text("Calories: \(Int(dish.calories))").foregroundColor(textGrey)
-                Text("Fat: \(Int(dish.fat))").foregroundColor(textGrey)
-                Text("Protein: \(Int(dish.protein))").foregroundColor(textGrey)
-                Text("Sugar: \(Int(dish.sugar))").foregroundColor(textGrey)
-                Text("Carbs: \(Int(dish.carbs))").foregroundColor(textGrey)
-            }
-            .cornerRadius(10)
-            .padding(.vertical, 5)
-            }
     }
     
     func loadJSONData(from filename: String) -> [String: Any]? {
@@ -188,6 +168,49 @@ struct SearchView: View {
 
             return 0.0
         }
+    
+    struct PreviewBox: View {
+        var color: Color
+        var dish: Dish
+        
+        var body: some View {
+            Button(action: {
+                print("selected preview: " + dish.name + "\n\tCalories: " + String(Int(dish.calories)))
+            }) {
+                HStack {
+                    Image(systemName: "photo.on.rectangle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 120)
+                        .padding()
+                        .foregroundColor(.white)
+                    Text(dish.name)
+                        .font(.system(size:26))
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+                .background(color)
+                .cornerRadius(10)
+            }
+        }
+    }
+    
+    struct CustomRoundedBorderTextFieldStyle:
+        TextFieldStyle {
+        let boxGrey = Color(hex: 0x404040)
+        let textGrey = Color(hex: 0x999999)
+
+        func _body(configuration: TextField<Self._Label>) -> some View {
+            configuration
+                .frame(width: .infinity, height: 75)
+                .padding(.horizontal, 10) // Padding inside the text field
+                .background(RoundedRectangle(cornerRadius: 8).stroke(boxGrey, lineWidth: 2).foregroundColor(.white))
+                // Custom border style
+                .foregroundColor(.white) // Text color
+                .font(.system(size:30)) // Text font
+            
+        }
+    }
 }
 
 #Preview {

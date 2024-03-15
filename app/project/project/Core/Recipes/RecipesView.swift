@@ -35,8 +35,7 @@ struct RecipesView: View {
             
             ScrollView {
                 VStack(spacing: 20) {
-                    ForEach(recipes, id: \.name) { recipe in
-                        RecipeObject(recipe: recipe)
+                    ForEach(recipes, id: \.name) { recipe in PreviewBox(color:boxGrey, recipe:recipe)
                     }
                 }
                 .padding()
@@ -45,6 +44,8 @@ struct RecipesView: View {
         }.background(Color.black)
             .onAppear{recipes = loadRecipes()}
     }
+    
+    
     
     func loadJSONData(from filename: String) -> [String: Any]? {
         if let url = Bundle.main.url(forResource: filename, withExtension: "json") {
@@ -98,21 +99,29 @@ struct RecipesView: View {
         return recipeDataArray
     }
     
-    struct RecipeObject: View {
-        let boxGrey = Color(hex: 0x404040)
-        let textGrey = Color(hex: 0x999999)
-
-        let recipe: Recipe
+    struct PreviewBox: View {
+        var color: Color
+        var recipe: Recipe
+        
         var body: some View {
-            VStack() {
-                Text(recipe.name)
-                    .font(.system(size:26))
-                    .foregroundColor(textGrey)
-                Text(recipe.url).foregroundColor(textGrey)
+            Button(action: {
+                print("selected preview:  \(recipe.url)")
+            }) {
+                HStack {
+                    Image(systemName: "photo.on.rectangle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 120)
+                        .padding()
+                        .foregroundColor(.white)
+                    Text(recipe.name)
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+                .background(color)
+                .cornerRadius(10)
             }
-            .cornerRadius(10)
-            .padding(.vertical, 5)
-            }
+        }
     }
 }
 
