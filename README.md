@@ -40,5 +40,9 @@ The **Compiled Dataset** is an excel sheet of recipes and their respective infor
     - Information in the **USER** and **HEALTH** table is live
   - We store recipe information in the **DISHES**, **INGREDIENTS**, **DISH_TO_INGREDIENTS**, and **ALLERGENS** tables
 
-
+### Backend
+- The **Backend** loads the **Compiled Dataset** into a SQL database, making tables, views, and useful statistics from the data. The **Backend** also generates the recommendations for the user using a **Personal Contextual Model** (a summary of which is shown below).
 ![Overview of the personal contextual model and how it works. The front end and the back end generate feature vectors that are processed and turned into recommendations that are pushed to the user](https://github.com/Drew-1771/FuelFinder/blob/main/assets/cs125_recommendation_diagram.png?raw=true)
+
+* **Personal Contextual Model**
+  - The users data is used to generate their feature vector (this is described in depth in the recommendation.py file). The **Frontend** sends the data from Healthkit to generate the User feature vector on the **Backend**. The User feature vector is transformed into the Final feature vector for the user, the calories, protein, and carbs needed. The **Backend** then generates a parallel vector of information for each dish, and they are compared using euclidean distance.
