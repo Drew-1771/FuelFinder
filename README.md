@@ -63,8 +63,6 @@ The **Compiled Dataset** is an Excel sheet of recipes and their respective infor
 
 ### Frontend and User Device
 
-![Overview of the app and features. The Home tab allows users to see their generic daily recommendations, as well as 2 horizontal scrollers for personal recommendations and popular foods. The Search tab allows users to search dishes. The Saved Recipes tab shows users their saved recipes and shareable groups of recipes.](https://github.com/Drew-1771/FuelFinder/blob/main/assets/cs125_app_diagram.png?raw=true)
-
 #### Home Tab
 
 - The Home tab allows users to see their generic daily recommendations. These recommendations are shown to encourage the user to explore. This is beneficial because it allows us to tune their personalized recommendations. The Home tab also has 2 horizontal scrollers for personal recommendations, which is what we generate on the **Backend**, and popular foods, which is also an attempt to get the user to explore.
@@ -76,3 +74,5 @@ The **Compiled Dataset** is an Excel sheet of recipes and their respective infor
 #### Saved Recipes Tab
 
 - The Saved Recipes tab shows users their saved recipes and shareable groups of recipes. We thought users could group recipes together to make something along the lines of a virtual cookbook, which they could send and share with friends.
+
+![Overview of the app and features. The Home tab allows users to see their generic daily recommendations, as well as 2 horizontal scrollers for personal recommendations and popular foods. The Search tab allows users to search dishes. The Saved Recipes tab shows users their saved recipes and shareable groups of recipes.](https://github.com/Drew-1771/FuelFinder/blob/main/assets/cs125_app_diagram.png?raw=true)
